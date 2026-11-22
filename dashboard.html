@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CampFix – Dashboard</title><link rel="stylesheet" href="style.css"></head>
+<body>
+<nav><a class="logo" href="index.html">CampFix</a>
+  <div class="links"><span id="hello"></span><a class="btn ghost" href="#" onclick="logout()">Logout</a></div></nav>
+
+<div class="wrap dash">
+  <section class="box">
+    <h2>Report a problem</h2>
+    <form id="form" novalidate>
+      <label for="title">What is the problem?</label>
+      <input id="title" maxlength="60" placeholder="e.g. Fan not working in Room 204">
+      <label for="category">Category</label>
+      <select id="category"><option>Electricity</option><option>Water</option><option>Classroom</option><option>Hostel</option><option>Canteen</option><option>Wi-Fi</option><option>Cleanliness</option><option>Other</option></select>
+      <label for="location">Location</label>
+      <input id="location" maxlength="40" placeholder="e.g. Block B, 2nd floor">
+      <label for="desc">Details</label>
+      <textarea id="desc" maxlength="300"></textarea>
+      <p class="err" id="err" role="alert"></p>
+      <button class="btn full" type="submit">Submit report</button>
+    </form>
+  </section>
+
+  <section class="box">
+    <h2>Reported problems</h2>
+    <div class="stats">
+      <div class="stat"><b id="sTotal">0</b>Total</div>
+      <div class="stat"><b id="sOpen">0</b>Open</div>
+      <div class="stat"><b id="sRes">0</b>Resolved</div>
+    </div>
+    <div class="bar">
+      <input id="search" placeholder="Search problems...">
+      <select id="filter" style="width:auto"><option value="all">All status</option><option value="open">Open</option><option value="progress">In progress</option><option value="resolved">Resolved</option></select>
+    </div>
+    <div id="list"></div>
+  </section>
+</div>
+
+<script src="auth.js"></script>
+<script>
+  requireLogin();
+  const me = currentUser();
+  document.getElementById("hello").textContent = "Hi, " + (me ? me.name : "");
+
+  const KEY = "campfix_issues";
+  const LABEL = { open: "Open", progress: "In progress", resolved: "Resolved" };
+  let issues = [];
+  try { issues = JSON.parse(localStorage.getItem(KEY)) || []; } catch (e) {}
+  const $ = id => document.getElementById(id);
+  const save = () => localStorage.setItem(KEY, JSON.stringify(issues));
+  const esc = s => { const d = document.createElement("div"); d.textContent = s; return d.innerHTML; };
+
+  function render() {
+    const f = $("filter").value, q = $("search").value.trim().toLowerCase();
+    const shown = issues.filter(i => (f === "all" || i.status === f) &&
+      (i.title + " " + i.location + " " + i.category).toLowerCase().includes(q));
+    $("sTotal").textContent = issues.length;
+    $("sOpen").textContent = issues.filter(i => i.status !== "resolved").length;
+    $("sRes").textContent = issues.filter(i => i.status === "resolved").length;
+    if (!shown.length) { $("list").innerHTML = '<div class="empty">No problems here yet. Use the form to report one.</div>'; return; }
+    $("list").innerHTML = shown.map(i => `
+      <article class="issue ${i.status}">
+        <h3>${esc(i.title)} <span class="badge">${LABEL[i.status]}</span></h3>
+        <div class="meta">${esc(i.category)} · ${esc(i.location)} · by ${esc(i.by)} · ${i.date}</div>
+        <p>${esc(i.desc) || "No details given."}</p>
+        <div class="actions">
+          <select onchange="setStatus(${i.id}, this.value)" aria-label="Change status">
+            ${Object.keys(LABEL).map(k => `<option value="${k}" ${k === i.status ? "selected" : ""}>${LABEL[k]}</option>`).join("")}
+          </select>
+          <button class="btn del" onclick="removeIssue(${i.id})">Delete</button>
+        </div>
+      </article>`).join("");
+  }
+  function setStatus(id, s) { issues.find(i => i.id === id).status = s; save(); render(); }
+  function removeIssue(id) { if (confirm("Delete this report?")) { issues = issues.filter(i => i.id !== id); save(); render(); } }
+
+  $("form").addEventListener("submit", e => {
+    e.preventDefault();
+    const title = $("title").value.trim(), location_ = $("location").value.trim();
+    if (!title || !location_) return $("err").textContent = "Please fill in the problem and its location.";
+    $("err").textContent = "";
+    issues.unshift({ id: Date.now(), title, location: location_, category: $("category").value,
+      desc: $("desc").value.trim(), status: "open", by: me.name, date: new Date().toLocaleDateString("en-IN") });
+    save(); e.target.reset(); render();
+  });
+  $("filter").addEventListener("change", render);
+  $("search").addEventListener("input", render);
+  render();
+</script>
+</body></html>

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CampFix – Register</title><link rel="stylesheet" href="style.css"></head>
+<body>
+<nav><a class="logo" href="index.html">CampFix</a>
+  <div class="links"><a href="login.html">Login</a></div></nav>
+
+<form class="box auth" id="form" novalidate>
+  <h2>Create your account</h2>
+  <label for="name">Full name</label><input id="name">
+  <label for="email">Email</label><input id="email" type="email">
+  <label for="pass">Password (min 6 characters)</label><input id="pass" type="password">
+  <label for="pass2">Confirm password</label><input id="pass2" type="password">
+  <p class="err" id="err" role="alert"></p>
+  <button class="btn full" type="submit">Register</button>
+  <p>Already have an account? <a href="login.html">Login</a></p>
+</form>
+
+<script src="auth.js"></script>
+<script>
+  document.getElementById("form").addEventListener("submit", e => {
+    e.preventDefault();
+    const v = id => document.getElementById(id).value.trim();
+    const err = document.getElementById("err");
+    if (!v("name") || !v("email") || !v("pass")) return err.textContent = "Please fill in all fields.";
+    if (!/^\S+@\S+\.\S+$/.test(v("email"))) return err.textContent = "Enter a valid email address.";
+    if (v("pass").length < 6) return err.textContent = "Password must be at least 6 characters.";
+    if (v("pass") !== v("pass2")) return err.textContent = "Passwords do not match.";
+    const msg = registerUser(v("name"), v("email"), v("pass"));
+    if (msg) return err.textContent = msg;
+    alert("Registered! Please login.");
+    location.href = "login.html";
+  });
+</script>
+</body></html>

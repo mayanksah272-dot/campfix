@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CampFix – Login</title><link rel="stylesheet" href="style.css"></head>
+<body>
+<nav><a class="logo" href="index.html">CampFix</a>
+  <div class="links"><a href="register.html">Register</a></div></nav>
+
+<form class="box auth" id="form" novalidate>
+  <h2>Login</h2>
+  <label for="email">Email</label><input id="email" type="email">
+  <label for="pass">Password</label><input id="pass" type="password">
+  <p class="err" id="err" role="alert"></p>
+  <button class="btn full" type="submit">Login</button>
+  <p>New here? <a href="register.html">Create an account</a></p>
+</form>
+
+<script src="auth.js"></script>
+<script>
+  if (currentUser()) location.href = "dashboard.html";
+  document.getElementById("form").addEventListener("submit", e => {
+    e.preventDefault();
+    const email = document.getElementById("email").value.trim();
+    const pass = document.getElementById("pass").value;
+    const err = document.getElementById("err");
+    if (!email || !pass) return err.textContent = "Enter your email and password.";
+    const msg = loginUser(email, pass);
+    if (msg) return err.textContent = msg;
+    location.href = "dashboard.html";
+  });
+</script>
+</body></html>

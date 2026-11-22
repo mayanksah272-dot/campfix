@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CampFix – Home</title><link rel="stylesheet" href="style.css"></head>
+<body>
+<nav><a class="logo" href="index.html">CampFix</a>
+  <div class="links" id="links"></div></nav>
+
+<div class="hero">
+  <h1>Fix campus problems faster</h1>
+  <p>Report broken fans, water leaks, Wi-Fi issues and more. Track every report until it is resolved.</p>
+  <a class="btn" href="register.html">Get started</a>
+</div>
+
+<div class="wrap">
+  <div class="grid3">
+    <div class="box"><h3>1. Report</h3><p>Describe the problem and where it is on campus.</p></div>
+    <div class="box"><h3>2. Track</h3><p>See if it is Open, In progress or Resolved.</p></div>
+    <div class="box"><h3>3. Resolved</h3><p>Staff update the status when the work is done.</p></div>
+  </div>
+</div>
+<footer>CampFix – Full Stack subject project</footer>
+
+<script src="auth.js"></script>
+<script>
+  const u = currentUser();
+  document.getElementById("links").innerHTML = u
+    ? '<a href="dashboard.html">Dashboard</a><a class="btn ghost" href="#" onclick="logout()">Logout</a>'
+    : '<a href="login.html">Login</a><a class="btn" href="register.html">Register</a>';
+</script>
+</body></html>
